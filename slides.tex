@@ -1,0 +1,111 @@
+\documentclass[aspectratio=43]{beamer}
+% Theme works only with a 4:3 aspect ratio
+\usetheme{CSCS}
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usetikzlibrary{pgfplots.groupplots,spy,patterns}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{positioning}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{tcolorbox}
+\usepackage{anyfontsize}
+\usepackage{xspace}
+\usepackage{graphicx}
+
+% define footer text
+\newcommand{\footlinetext}{Performance-portability: Arbor}
+
+% Select the image for the title page
+\newcommand{\picturetitle}{cscs_images/image5.pdf}
+
+% fonts for maths
+\usefonttheme{professionalfonts}
+\usefonttheme{serif}
+
+% source code listing
+\newcommand\TS{\rule{0pt}{2.6ex}}       % Top strut
+\newcommand\BS{\rule[-1.2ex]{0pt}{0pt}} % Bottom strut
+\newcommand{\hl}[1]{\textbf{\textcolor{blue}{#1}}} % for hilighting optimal entries in tables
+\newcommand{\rl}[1]{\textbf{\textcolor{red}{#1}}} % for hilighting sub-optimal entries in tables
+\newcommand{\img}[1]{{\Large \textbf{IMAGE {#1}}}}
+\newcommand{\hilight}[1]{\textcolor{blue!20!orange}{#1}}
+\newcommand{\arbor}{{\ttfamily Arbor}\xspace}
+\newcommand{\neuron}{{\ttfamily NEURON}\xspace}
+\newcommand{\coreneuron}{{\ttfamily CoreNeuron}\xspace}
+\newcommand{\daintmc}[0]{Daint-mc\xspace}
+\newcommand{\daintgpu}[0]{Daint-gpu\xspace}
+\newcommand{\tave}[0]{Tave-knl\xspace}
+\newcommand{\pder}[2]{\frac{\partial{#1}}{\partial{#2}}}
+
+% set indent to a more reasonable level (so that itemize can be used in columns)
+\setlength{\leftmargini}{20pt}
+
+\DeclareTextFontCommand{\emph}{\bfseries\color{blue!70!black}}
+
+\author{Nora Abi Akar, Ben Cumming, Vasileios Karakasis, Anne Küsters, Wouter Klijn, Alexander Peyser, Stuart Yates}
+\title{\arbor{} -- portable morphologically-detailed neural network simulation}
+\subtitle{CNS*2020 Workshop \emph{Tools and resources for developing and sharing models in computational neuroscience} \date{} }
+
+\begin{document}
+
+% TITLE SLIDE
+\cscstitle
+
+%-------------------------------------------
+\begin{frame}[fragile]{}
+    \begin{center}
+        \includegraphics[height=0.15\textwidth]{logos/HBP_logo.jpg}
+        \\ \vfill
+
+        This research has received funding from the European Union’s Horizon 2020 Framework Programme for Research
+        and Innovation under the Specific Grant Agreement No.  720270 (Human Brain Project SGA1), and Specific Grant
+        Agreement No. 785907 (Human Brain Project SGA2).
+        \\ \vfill
+
+        \includegraphics[height=0.1\textwidth]{logos/julich_logo.pdf}
+        \hspace{1cm}
+        \includegraphics[height=0.09\textwidth]{logos/cscs_logo.pdf}
+    \end{center}
+
+\end{frame}
+%-------------------------------------------
+
+%\input{intro.tex}
+
+\cscschapter{Conclusion}
+
+%-------------------------------------------
+\begin{frame}[fragile]{Retrospective}
+    After 4 years of development we have come to realise that...
+    \begin{itemize}
+        \item Unit tests pay you back more the longer you have them.
+        \item The amount of time spent hacking on low level GPU or vectorized code is much less than the time spent on interfaces.
+        \begin{itemize}
+            \item But is less than the time spent hacking without interfaces.
+        \end{itemize}
+        \item The multi-core vectorization backend ultimately took the same amount of effort as the CUDA backend.
+        \item Amdahl's law matters on the GPU.
+    \end{itemize}
+\end{frame}
+%-------------------------------------------
+
+%-------------------------------------------
+\begin{frame}[fragile]{}
+    \arbor is under active, open, development.
+
+    \vspace{10pt}
+
+    \begin{center}
+        \arbor is \emph{open source software}:\\
+        \vspace{3pt}
+        \begin{lstlisting}[style=talkpseudo]
+                  github.com/arbor-sim/arbor
+        \end{lstlisting}
+    \end{center}
+\end{frame}
+%-------------------------------------------
+
+\end{document}

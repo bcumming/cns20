@@ -1,0 +1,13 @@
+clean
+cscs_images
+data
+images
+logos
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+slides.pdf
