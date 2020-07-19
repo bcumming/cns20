@@ -3,6 +3,7 @@ cscs_images
 data
 images
 logos
+*.svg
 *.aux
 *.log
 *.nav
