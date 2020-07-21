@@ -358,21 +358,18 @@ sim = arbor.simulation(rec, dst, ctx)
               like Python/HOC.
     \end{enumerate}
     \vspace{10pt}
-    \emph{The challenge}: Models need to describe morphologies, and locations and regions on the morphology:
-    \begin{itemize}
-        \item synapse sites
-        \item distribution of ion channels
-    \end{itemize}
+    \emph{The challenge}: Models need to describe morphologies, and locations and regions on the morphology.
 \end{frame}
 %-------------------------------------------
 
 %-------------------------------------------
 \begin{frame}[fragile]{Step 1: Morphology Representation}
-    Cells are composed of \emph{cable segments} that:
+    Cells are composed of \emph{cable segments}:
     \begin{itemize}
-        \item are truncated conic frustums;
-        \item can be dislocated;
-        \item form branches (c.f. SONATA sections).
+        \item truncated conic frustums, not cylinders;
+        \item we removed support for a spherical segment at ``soma''.
+        %\item can be dislocated;
+        %\item form branches (c.f. SONATA sections).
     \end{itemize}
 
     \begin{center}
@@ -404,9 +401,8 @@ sim = arbor.simulation(rec, dst, ctx)
     \begin{itemize}
         \item The soma.
         \item The dendritic arbor.
-        \item The distal half of branch 1.
-        \item Everywhere greater than 100 um from the soma.
-        \item The dendrites with radius less than 1 um.
+        \item Everywhere more distant than 100 $\mu$m from the soma.
+        \item The dendrites with radius less than 1 $\mu$m.
     \end{itemize}
     \vspace{5pt}
     \arbor provides a DSL for their succinct description.
@@ -447,7 +443,7 @@ labels = {'soma': '(tag 1)',
 %-------------------------------------------
 
 %-------------------------------------------
-\begin{frame}[fragile]{Locset examples}
+\begin{frame}[fragile]{Region and locset examples}
     \begin{columns}[T]
         \begin{column}{0.5\textwidth}
             \includegraphics[width=\textwidth]{images/ls_term.png}
@@ -459,37 +455,6 @@ labels = {'soma': '(tag 1)',
             \end{lstlisting}
 
             The tips (terminals) of the dendritic arbor (tag 3).
-
-        \end{column}
-        \begin{column}{0.5\textwidth}
-            \includegraphics[width=\textwidth]{images/ls_uniform.png}
-
-            \vspace{10pt}
-
-            \begin{lstlisting}[style=arblang]
-(uniform (tag 3) 0 9 0)
-            \end{lstlisting}
-
-            Ten random locations on the dendritic arbor.
-
-        \end{column}
-    \end{columns}
-\end{frame}
-%-------------------------------------------
-
-%-------------------------------------------
-\begin{frame}[fragile]{Region examples}
-    \begin{columns}[T]
-        \begin{column}{0.5\textwidth}
-            \includegraphics[width=\textwidth]{images/reg_tag3.png}
-
-            \vspace{10pt}
-
-            \begin{lstlisting}[style=arblang]
-(tag 3)
-            \end{lstlisting}
-
-            The dendritic arbor, which has tag 3, derived from the SWC structure identifier.
 
         \end{column}
         \begin{column}{0.5\textwidth}
@@ -589,7 +554,7 @@ cell.place('stim',   arb.i_clamp(delay=10, duration=10, amplitude=0.4))
 %-------------------------------------------
 \begin{frame}[fragile]{Allen SDK: results}
     \vfill
-    Results from running the model with Python 3.8:
+    Results from running the model with Python 3.8 on a 2018 Macbook:
     \begin{itemize}
         \item \neuron v7.7 (pip): 118s.
         \item \arbor v0.3.dev (cmake): 14s.
@@ -643,6 +608,8 @@ cell.place('stim',   arb.i_clamp(delay=10, duration=10, amplitude=0.4))
                   github.com/arbor-sim/arbor
         \end{lstlisting}
     \end{center}
+
+    Version 0.4 with full support for Allen SDK mechanisms and morphology descriptions will be released very soon.
 \end{frame}
 %-------------------------------------------
 
