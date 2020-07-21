@@ -14,6 +14,7 @@
 \usepackage{anyfontsize}
 \usepackage{xspace}
 \usepackage{graphicx}
+\usepackage{pifont}
 
 % define footer text
 \newcommand{\footlinetext}{Performance-portability: Arbor}
@@ -45,7 +46,7 @@
 
 \DeclareTextFontCommand{\emph}{\color{blue!85!black}}
 
-\author{Ben Cumming}
+\author{\textbf{Ben Cumming}, Nora Abi Akar, Stuart Yates, Thorsten Hater, Anne K\"usters, Alexander Peyser.}
 \title{Portable simulation with \arbor.}
 \subtitle{CNS*2020}
 %\subtitle{CNS*2020 Workshop \emph{Tools and resources for developing and sharing models in computational neuroscience} \date{} }
@@ -54,25 +55,6 @@
 
 % TITLE SLIDE
 \cscstitle
-
-%-------------------------------------------
-\begin{frame}[fragile]{}
-    \begin{center}
-        \includegraphics[height=0.15\textwidth]{logos/HBP_logo.jpg}
-        \\ \vfill
-
-        This research has received funding from the European Union’s Horizon 2020 Framework Programme for Research
-        and Innovation under the Specific Grant Agreement No.  720270 (Human Brain Project SGA1), and Specific Grant
-        Agreement No. 785907 (Human Brain Project SGA2).
-        \\ \vfill
-
-        \includegraphics[height=0.1\textwidth]{logos/julich_logo.pdf}
-        \hspace{1cm}
-        \includegraphics[height=0.09\textwidth]{logos/cscs_logo.pdf}
-    \end{center}
-
-\end{frame}
-%-------------------------------------------
 
 %-------------------------------------------
 %\begin{frame}[fragile]{Overview}
@@ -91,20 +73,16 @@
 %-------------------------------------------
 \begin{frame}[fragile]{HPC Requires Portability}
     HPC is required to meet ambitious modeling aims.
-
-    The \emph{free lunch} for exisiting software is over!
+    \\ \vspace{15pt}
+    All major HPC systems coming online in the next few years will be GPU based:
     \begin{itemize}
-        \item Future gains in computational power will come from many-core processors (GPUs)
-        \item All major HPC systems will be GPU based:
-        \begin{itemize}
-            \item Piz Daint @ CSCS (since 2015);
-            \item Marconi100 @ Cineca (May 2020);
-            \item EuroHPC pre-exascale systems (late 2021);
-            \item US ECP pre-exascale and exascale systems (2021-2023)
-        \end{itemize}
-        \item \dots The ARM chips in Fugaku are closer to GPUs than a single core CPU.
+        \item Piz Daint @ CSCS (since 2015);
+        \item Marconi100 @ Cineca (May 2020);
+        \item EuroHPC pre-exascale systems (late 2021);
+        \item US ECP pre-exascale and exascale systems (2021-2023)
     \end{itemize}
-    Tools and models have to be portable across hardware architectures.
+    \vspace{15pt}
+    Tools and models they consume will have to be portable.
 \end{frame}
 %-------------------------------------------
 
@@ -124,8 +102,10 @@
         \item All GPUs (CUDA, HIP, Clang-CUDA)
         \item SIMD CPU backends: (AVX, AVX2, AVX512, Neon, SVE).
         \item Distributed simulation (MPI).
-        \item Significantly lower memory and time requirements than \neuron and CoreNeuron.
     \end{itemize}
+    \vspace{10pt}
+    This talk will focus on how \arbor facilitates \emph{model portability}.
+
     %Requires a \emph{rich interface} for defining models.
     %\begin{itemize}
     %    \item Simulation of electrical current in arbitrarily complex morphologies.
@@ -165,9 +145,12 @@
 % of these model features is quite difficult. *HOWEVER* developing an interface that
 % facilitates flexible description of models that can run on those back ends is much
 % much harder, and must be integrated correctly with the underlying simulation engine.
-    Efficient simulation of diverse models on different architectures requires focus on portability, interfaces and design.
+%
+% Currently, there is one tool that is widely used for this type of simulation: NEURON.
+% The reason it stands alone is because it has an interface that allows users to
+% describe these diverse models: Arbor does the same.
 
-    \vspace{30pt}
+%    \vspace{30pt}
 
     The main challenge developing \arbor has been defining an interface for inputing models.
 \end{frame}
@@ -199,35 +182,52 @@ Portability has two aspects:
 \item \emph{Performance portability}, tools that:
     \begin{itemize}
         \item run efficiently and scale on different architectures;
-        \item provide scale-agnostic, reproducable results;
+        %\item provide scale-agnostic, reproducable results;
         \item can be adapted to support new architectures.
     \end{itemize}
 
     \item \emph{Model portability}, model descriptions that are:
     \begin{itemize}
         \item simulator and architecture agnostic;
-        \item flat (translated, not interpretted);
+        \item \emph{flat}, which means:
+        \begin{itemize}
+            \item what, not how.
+            \item translated, not interpreted.
+        \end{itemize}
+        %\item unambiguous.
     \end{itemize}
 \end{enumerate}
 
 \end{frame}
 
-\begin{frame}[fragile]{Portability}
+\begin{frame}[fragile]{Facilitating portability in tools}
 
 These concerns are not orthogonal.
 \begin{itemize}
-    \item Require \emph{separation of concerns} between model description and lowered back end implemention.
+    \item Require \emph{separation of concerns} between model description and their implemention.
 \end{itemize}
-\vspace{20pt}
-Practically, this requires that model descriptions \emph{minimise}:
-\begin{itemize}
-    \item Architecture-specific or simulator-specific information;
-    \item Arbitrary code (Python, HOC, SLI).
-\end{itemize}
+
+\vspace{10pt}
+
+%Practically, this requires that model descriptions \emph{minimise}:
+%\begin{itemize}
+    %\item Architecture-specific or simulator-specific information;
+    %\item Arbitrary code (Python, HOC, SLI).
+%\end{itemize}
+
+Simulation tools can support portable descriptions by:
+\begin{enumerate}
+    \item Separating hardware and implementation details from model description interface;
+    \item Using flat model descriptions in their interface.
+\end{enumerate}
+
+\vspace{10pt}
+
+I will now illustrate each of these in \arbor's interface.
 
 \end{frame}
 
-\cscschapter{Separating the model from architecture}
+\cscschapter{1. Separate model from implementation.}
 
 % In this next section we will see how Arbor's API enforces this separation between
 % model description and the target architecture on which the code will run.
@@ -259,19 +259,14 @@ Practically, this requires that model descriptions \emph{minimise}:
 %-------------------------------------------
 \begin{frame}[fragile]{Step 2: Hardware context (which hardware)}
 
-    \vspace{-20pt}
-
-    \begin{code}{Select hardware resources}
         \begin{lstlisting}[style=talkpython]
 import arbor
 from mpi4py import MPI
 
 rec = my_recipe() # user defined model
-ctx = arbor.context(threads=12, gpu_id=0, mpi=MPI.COMM_WORLD)
+ctx = arbor.context(threads=8, gpu_id=0, mpi=MPI.COMM_WORLD)
         \end{lstlisting}
-    \end{code}
 
-\vfill
 
     Users can select hardware resources at run time:
     \begin{itemize}
@@ -284,16 +279,16 @@ ctx = arbor.context(threads=12, gpu_id=0, mpi=MPI.COMM_WORLD)
 
 %-------------------------------------------
 \begin{frame}[fragile]{Step 3: Domain decomposition}
-    \begin{code}{Define domain decomposition}
         \begin{lstlisting}[style=talkpython]
 import arbor
 from mpi4py import MPI
 
 rec = my_recipe() # user defined model
-ctx = arbor.context(threads=12, gpu_id=0, mpi=MPI.COMM_WORLD)
+ctx = arbor.context(threads=8, gpu_id=0, mpi=MPI.COMM_WORLD)
 dst = arbor.partition_load_balance(rec, ctx)
         \end{lstlisting}
-    \end{code}
+
+    \vspace{10pt}
 
     Which cells to compute where:
     \begin{enumerate}
@@ -311,16 +306,15 @@ dst = arbor.partition_load_balance(rec, ctx)
 
 %-------------------------------------------
 \begin{frame}[fragile]{Step 4: Instantiate model}
-    \begin{code}{Instantiate model on target compute resources}
         \begin{lstlisting}[style=talkpython]
 import arbor
 from mpi4py import MPI
 
 rec = my_recipe() # user defined model
-ctx = arbor.context(threads=12, gpu_id=0, mpi=MPI.COMM_WORLD)
-sim = arbor.simulation(rec, ctx)
+ctx = arbor.context(threads=8, gpu_id=0, mpi=MPI.COMM_WORLD)
+dst = arbor.partition_load_balance(rec, ctx)
+sim = arbor.simulation(rec, dst, ctx)
         \end{lstlisting}
-    \end{code}
 
     A simulation object:
     \begin{itemize}
@@ -336,7 +330,7 @@ sim = arbor.simulation(rec, ctx)
         \end{itemize}
     \end{itemize}
 
-    Caller can optionally provide hints on how to assign model to hardware resources.
+    \vfill
 \end{frame}
 %-------------------------------------------
 
@@ -350,26 +344,24 @@ sim = arbor.simulation(rec, ctx)
 %\end{frame}
 %-------------------------------------------
 
-\cscschapter{Describing Single Cells}
+\cscschapter{2. Use flat descriptions in API.}
 
 %-------------------------------------------
 \begin{frame}[fragile]{}
-    Constructing descriptions of single cells is the main portability challenge with NEURON models
-    \begin{enumerate}
-        \item The NMODL language describes dynamics of individual mechanisms.
-        \item Distribution and properties of mechanisms with a Turing complete language
-              like Python/HOC is non-portable.
-    \end{enumerate}
+    \emph{Observation}: constructing descriptions of single cells is the main portability
+    challenge with multicompartment models developed for NEURON.
 
-    Models need to describe locations and regions on the morphology:
+    \vspace{10pt}
+    \begin{enumerate}
+        \item \textcolor{green!50!black}{\ding{51}} The NMODL language describes dynamics of individual mechanisms.
+        \item \textcolor{red}{\ding{55}} Distribution and properties of mechanisms are described with a Turing complete language
+              like Python/HOC.
+    \end{enumerate}
+    \vspace{10pt}
+    \emph{The challenge}: Models need to describe morphologies, and locations and regions on the morphology:
     \begin{itemize}
         \item synapse sites
         \item distribution of ion channels
-    \end{itemize}
-
-    NeuroML is an example of a flat description.
-    \begin{itemize}
-        \item Arbor uses its own DSL for regions and locations.
     \end{itemize}
 \end{frame}
 %-------------------------------------------
@@ -389,7 +381,7 @@ sim = arbor.simulation(rec, ctx)
         \small \textit{(Left) Segments (red=soma, grey=axon, blue=dend);\\(right) The branches.}
     \end{center}
 
-    Can represent SWC, NeuroML and Neurolicida formats.
+    This can represent NeuroML, SWC and Neurolicida formats.
     \begin{itemize}
         \item \texttt{<rant>} \textit{please} don't use ``spherical'' somas in SWC files: it makes no sense. \texttt{</rant>}
     \end{itemize}
@@ -442,7 +434,7 @@ labels = {'soma': '(tag 1)',
           'dend': '(tag 3)',
           'apic': '(tag 4)',
           'inhib': '(uniform (region "dend")   0  99 0)',
-          'stim-site': '(cable 0 0.5)'}
+          'stim': '(cable 0 0.5)'}
     \end{lstlisting}
 
     Replace \& simplify non-portable and bug-prone hoc templates.
@@ -516,85 +508,130 @@ labels = {'soma': '(tag 1)',
 %-------------------------------------------
 
 %-------------------------------------------
-\begin{frame}[fragile]{Step 3: Apply to a morphology}
-    A label dictionary is combined with a morphology to build a concretised set of 
-    regions and locsets
+\begin{frame}[fragile]{Step 3: Build a cell and decorate}
+
+    \begin{lstlisting}[style=talkpython]
+import arbor as arb
+
+# Create a cable_cell description
+labels = {...}
+morph = arb.swc_import('purkinje.swc')
+cell = arb.cable_cell(morph, labels)
+
+# Bind mechanisms to regions and synapses to locsets
+cell.paint('soma', 'hh')
+cell.paint('dend', 'pas')
+cell.paint('axon', 'pas/g=0.0012')
+cell.place('inhib', 'expsyn')
+
+# Attach spike detector and a current clamp
+cell.place('(root)', arb.spike_detector(thresh=-10))
+cell.place('stim',   arb.i_clamp(delay=10, duration=10, amplitude=0.4))
+    \end{lstlisting}
+\end{frame}
+%-------------------------------------------
+
+%-------------------------------------------
+\begin{frame}[fragile]{A flat interface.}
+    This interface requires three separate flat bits of information to define a single cell:
+
+    \vspace{10pt}
+
+    \begin{enumerate}
+        \item A morphology description (e.g. an SWC file)
+        \item A dictionary that maps labels to regions and locset definitions.
+        \item A mapping of mechanisms and their properties to regions and locations.
+    \end{enumerate}
+
+    \vspace{10pt}
+
+    \arbor provides composable policies for compartmentalization, or explicit compartmentalization, that is \textit{independent} of the model description.
+\end{frame}
+%-------------------------------------------
+
+\cscschapter{Testing with the The Allen SDK}
+
+%-------------------------------------------
+\begin{frame}[fragile]{Allen SDK: models}
+    The Allen SDK provides programatic access to a wide range of open data sets and models from the Allen Institute.
+
+    \vspace{10pt}
+    Single cell models are described with:
+    \begin{enumerate}
+        \item An SWC morphology.
+        \item JSON file with mechanism and electrical properties with fitted parameters on regions.
+        \item Electrophysiology measurements.
+    \end{enumerate}
+    \vspace{10pt}
+    \emph{Aim}: write an \arbor wrapper for Allen SDK descriptions and validate againts \neuron.
+\end{frame}
+%-------------------------------------------
+%-------------------------------------------
+\begin{frame}[fragile]{Allen SDK: porting}
+    The first 90\% was easy (about 2 days):
+    \begin{itemize}
+        \item half a day to install Allen SDK, \neuron and \arbor.
+        \item half a day to update Allen NMODL files for \arbor.
+        \item half a day to get the model running in each simulator.
+    \end{itemize}
+    \vfill
+
+    The last 10\%, to get match results took longer (a week):
+    \begin{itemize}
+        \item Allen SDK modifies axon geometry to after loading.
+        \item \neuron automatically enables usine the Nernst equation under certan circumstances.
+        \item The JSON inputs are not fully uniform across all models.
+        \item Spherical somas in SWC files are a bit magic.
+    \end{itemize}
+\end{frame}
+%-------------------------------------------
+
+%-------------------------------------------
+\begin{frame}[fragile]{Allen SDK: results}
+    \vfill
+    Results from running the model with Python 3.8:
+    \begin{itemize}
+        \item \neuron v7.7 (pip): 118s.
+        \item \arbor v0.3.dev (cmake): 14s.
+    \end{itemize}
+
+    \vspace{-15pt}
+
+    \begin{center}
+    \includegraphics[width=0.75\textwidth]{images/allen-vs-arbor-no-sphere-here.png}
+    \end{center}
+
+\end{frame}
+%-------------------------------------------
+
+%-------------------------------------------
+\begin{frame}[fragile]{Allen SDK: conclusion}
+    The Allen SDK single cell model descriptions do a good job of separating model description from the simulation tool.
 
     \vspace{20pt}
 
-    Python code.
+    It isn't perfect, however the issues are all simple to address.
+
+    \vspace{20pt}
+
+    There are no significant barriers to using \arbor in The Allen SDK.
 \end{frame}
 %-------------------------------------------
 
 %-------------------------------------------
-\begin{frame}[fragile]{Step 4: Decorate the cell}
-    The regions are used to 
-\end{frame}
-%-------------------------------------------
-
-\cscschapter{Allen}
-
-%-------------------------------------------
-\begin{frame}[fragile]{}
-    For this talk we took model from Allen DB
-
-    What is Allen DB
-
-    Aim to test how "portable" SONATA is
-
-        If we can parse it without opening NEURON or reverse engineering the AllenSDK then it is portbale.
-\end{frame}
+%\begin{frame}[fragile]{Retrospective}
+    %After 5 years of development we have come to realise that...
+    %\begin{itemize}
+        %\item The number one road block stopping adoption of new tools is non-portable model descitions.
+        %\item Time spent hacking on low level GPU/CPU code is much less than the time spent on interfaces.
+    %\end{itemize}
+    %\vspace{10pt}
+    %SONATA is a promising move towards portability.
+%\end{frame}
 %-------------------------------------------
 
 %-------------------------------------------
-\begin{frame}[fragile]{Allen}
-    Ported NMODL
-
-        Now available in Arbor
-
-    Morphology was a pain point
-
-        SDK performs undocumented modifications to axons in *more than one location*
-
-        Spherical somas don't exist in NEURON, and we deprecated them in Arbor based on this experience
-        (they are a bad idea because they require "interpretation" of the input)
-
-mechanism naming, and layout of JSON input files reflected NEURON semantics and were not structured enough.
-
-    We needed a separate version of the runner script for each cell (differences in json layout between models)
-\end{frame}
-%-------------------------------------------
-
-%-------------------------------------------
-\begin{frame}[fragile]{}
-    Results: cell model name
-
-    Plot comparing voltage traces
-
-    Timing information
-\end{frame}
-%-------------------------------------------
-
-\cscschapter{Conclusion}
-
-%-------------------------------------------
-\begin{frame}[fragile]{Retrospective}
-    After 5 years of development we have come to realise that...
-    \begin{itemize}
-        \item The number one problem stopping adoption of new tools is non-portable model descitions:
-        \begin{itemize}
-            \item 
-        \end{itemize}
-        \item The amount of time spent hacking on low level GPU or vectorized code is much less than the time spent on interfaces.
-        \item Unit tests pay you back more the longer you have them.
-    \end{itemize}
-    \vspace{10pt}
-    SONATA is a promising move towards portability.
-\end{frame}
-%-------------------------------------------
-
-%-------------------------------------------
-\begin{frame}[fragile]{}
+\begin{frame}[fragile]{The end}
     \arbor is under active, open, development.
 
     \vspace{10pt}
@@ -608,5 +645,25 @@ mechanism naming, and layout of JSON input files reflected NEURON semantics and 
     \end{center}
 \end{frame}
 %-------------------------------------------
+
+%-------------------------------------------
+\begin{frame}[fragile]{}
+    \begin{center}
+        \includegraphics[height=0.15\textwidth]{logos/HBP_logo.jpg}
+        \\ \vfill
+
+        This research has received funding from the European Union’s Horizon 2020 Framework Programme for Research
+        and Innovation under the Specific Grant Agreement No.  720270 (Human Brain Project SGA1), and Specific Grant
+        Agreement No. 785907 (Human Brain Project SGA2).
+        \\ \vfill
+
+        \includegraphics[height=0.1\textwidth]{logos/julich_logo.pdf}
+        \hspace{1cm}
+        \includegraphics[height=0.09\textwidth]{logos/cscs_logo.pdf}
+    \end{center}
+
+\end{frame}
+%-------------------------------------------
+
 
 \end{document}
